@@ -92,7 +92,7 @@ public class AccessRequest extends RadiusPacket {
 	 * @return user password
 	 */
 	public String getUserPassword() {
-		return password;
+		return this.password;
 	}
 
 	/**
@@ -115,7 +115,7 @@ public class AccessRequest extends RadiusPacket {
 	 * @return AUTH_PAP or AUTH_CHAP
 	 */
 	public String getAuthProtocol() {
-		return authProtocol;
+		return this.authProtocol;
 	}
 
 	/**
@@ -186,7 +186,7 @@ public class AccessRequest extends RadiusPacket {
 	 * @see org.tinyradius.packet.RadiusPacket#encodeRequestAttributes(java.lang.String)
 	 */
 	protected void encodeRequestAttributes(String sharedSecret) {
-		if (password == null || password.length() == 0)
+		if (this.password == null || this.password.length() == 0)
 			return;
 		// ok for proxied packets whose CHAP password is already encrypted
 		// throw new RuntimeException("no password set");
@@ -198,7 +198,7 @@ public class AccessRequest extends RadiusPacket {
 		}
 		else if (getAuthProtocol().equals(AUTH_CHAP)) {
 			byte[] challenge = createChapChallenge();
-			byte[] pass = encodeChapPassword(password, challenge);
+			byte[] pass = encodeChapPassword(this.password, challenge);
 			removeAttributes(CHAP_PASSWORD);
 			removeAttributes(CHAP_CHALLENGE);
 			addAttribute(new RadiusAttribute(CHAP_PASSWORD, pass));
@@ -321,7 +321,7 @@ public class AccessRequest extends RadiusPacket {
 	 * 
 	 * @return 16 byte CHAP challenge
 	 */
-	private byte[] createChapChallenge() {
+	private static byte[] createChapChallenge() {
 		byte[] challenge = new byte[16];
 		random.nextBytes(challenge);
 		return challenge;
@@ -360,21 +360,21 @@ public class AccessRequest extends RadiusPacket {
 	private boolean verifyChapPassword(String plaintext) throws RadiusException {
 		if (plaintext == null || plaintext.length() == 0)
 			throw new IllegalArgumentException("plaintext must not be empty");
-		if (chapChallenge == null || chapChallenge.length != 16)
+		if (this.chapChallenge == null || this.chapChallenge.length != 16)
 			throw new RadiusException("CHAP challenge must be 16 bytes");
-		if (chapPassword == null || chapPassword.length != 17)
+		if (this.chapPassword == null || this.chapPassword.length != 17)
 			throw new RadiusException("CHAP password must be 17 bytes");
 
-		byte chapIdentifier = chapPassword[0];
+		byte chapIdentifier = this.chapPassword[0];
 		MessageDigest md5 = getMd5Digest();
 		md5.reset();
 		md5.update(chapIdentifier);
 		md5.update(RadiusUtil.getUtf8Bytes(plaintext));
-		byte[] chapHash = md5.digest(chapChallenge);
+		byte[] chapHash = md5.digest(this.chapChallenge);
 
 		// compare
 		for (int i = 0; i < 16; i++)
-			if (chapHash[i] != chapPassword[i + 1])
+			if (chapHash[i] != this.chapPassword[i + 1])
 				return false;
 		return true;
 	}

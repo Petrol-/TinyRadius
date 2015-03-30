@@ -122,7 +122,7 @@ public abstract class RadiusServer {
 						logger.error("auth thread stopped by exception", e);
 					}
 					finally {
-						authSocket.close();
+						RadiusServer.this.authSocket.close();
 						logger.debug("auth socket closed");
 					}
 				}
@@ -143,7 +143,7 @@ public abstract class RadiusServer {
 						logger.error("acct thread stopped by exception", e);
 					}
 					finally {
-						acctSocket.close();
+						RadiusServer.this.acctSocket.close();
 						logger.debug("acct socket closed");
 					}
 				}
@@ -156,11 +156,11 @@ public abstract class RadiusServer {
 	 */
 	public void stop() {
 		logger.info("stopping Radius server");
-		closing = true;
-		if (authSocket != null)
-			authSocket.close();
-		if (acctSocket != null)
-			acctSocket.close();
+		this.closing = true;
+		if (this.authSocket != null)
+			this.authSocket.close();
+		if (this.acctSocket != null)
+			this.acctSocket.close();
 	}
 
 	/**
@@ -169,7 +169,7 @@ public abstract class RadiusServer {
 	 * @return auth port
 	 */
 	public int getAuthPort() {
-		return authPort;
+		return this.authPort;
 	}
 
 	/**
@@ -191,7 +191,7 @@ public abstract class RadiusServer {
 	 * @return socket timeout
 	 */
 	public int getSocketTimeout() {
-		return socketTimeout;
+		return this.socketTimeout;
 	}
 
 	/**
@@ -205,10 +205,10 @@ public abstract class RadiusServer {
 		if (socketTimeout < 1)
 			throw new IllegalArgumentException("socket tiemout must be positive");
 		this.socketTimeout = socketTimeout;
-		if (authSocket != null)
-			authSocket.setSoTimeout(socketTimeout);
-		if (acctSocket != null)
-			acctSocket.setSoTimeout(socketTimeout);
+		if (this.authSocket != null)
+			this.authSocket.setSoTimeout(socketTimeout);
+		if (this.acctSocket != null)
+			this.acctSocket.setSoTimeout(socketTimeout);
 	}
 
 	/**
@@ -230,7 +230,7 @@ public abstract class RadiusServer {
 	 * @return acct port
 	 */
 	public int getAcctPort() {
-		return acctPort;
+		return this.acctPort;
 	}
 
 	/**
@@ -242,7 +242,7 @@ public abstract class RadiusServer {
 	 * @return duplicate interval (ms)
 	 */
 	public long getDuplicateInterval() {
-		return duplicateInterval;
+		return this.duplicateInterval;
 	}
 
 	/**
@@ -267,7 +267,7 @@ public abstract class RadiusServer {
 	 * @return listen address or null
 	 */
 	public InetAddress getListenAddress() {
-		return listenAddress;
+		return this.listenAddress;
 	}
 
 	/**
@@ -292,7 +292,7 @@ public abstract class RadiusServer {
 	 * @param answer
 	 *            response packet
 	 */
-	protected void copyProxyState(RadiusPacket request, RadiusPacket answer) {
+	protected static void copyProxyState(RadiusPacket request, RadiusPacket answer) {
 		List proxyStateAttrs = request.getAttributes(33);
 		for (Iterator i = proxyStateAttrs.iterator(); i.hasNext();) {
 			RadiusAttribute proxyStateAttr = (RadiusAttribute) i.next();
@@ -341,7 +341,7 @@ public abstract class RadiusServer {
 						logger.debug("receive buffer size = " + s.getReceiveBufferSize());
 				}
 				catch (SocketException se) {
-					if (closing) {
+					if (this.closing) {
 						// end thread
 						logger.info("got closing signal - end listen thread");
 						return;
@@ -364,7 +364,7 @@ public abstract class RadiusServer {
 				// parse packet
 				RadiusPacket request = makeRadiusPacket(packetIn, secret);
 				if (logger.isInfoEnabled())
-					logger.info("received packet from " + remoteAddress + " on local address " + localAddress + ": " + request);
+					logger.info("received packet from " + remoteAddress + " on local address " + localAddress);
 
 				// handle packet
 				logger.trace("about to call RadiusServer.handlePacket()");
@@ -446,14 +446,14 @@ public abstract class RadiusServer {
 	 * @throws SocketException
 	 */
 	protected DatagramSocket getAuthSocket() throws SocketException {
-		if (authSocket == null) {
+		if (this.authSocket == null) {
 			if (getListenAddress() == null)
-				authSocket = new DatagramSocket(getAuthPort());
+				this.authSocket = new DatagramSocket(getAuthPort());
 			else
-				authSocket = new DatagramSocket(getAuthPort(), getListenAddress());
-			authSocket.setSoTimeout(getSocketTimeout());
+				this.authSocket = new DatagramSocket(getAuthPort(), getListenAddress());
+			this.authSocket.setSoTimeout(getSocketTimeout());
 		}
-		return authSocket;
+		return this.authSocket;
 	}
 
 	/**
@@ -463,14 +463,14 @@ public abstract class RadiusServer {
 	 * @throws SocketException
 	 */
 	protected DatagramSocket getAcctSocket() throws SocketException {
-		if (acctSocket == null) {
+		if (this.acctSocket == null) {
 			if (getListenAddress() == null)
-				acctSocket = new DatagramSocket(getAcctPort());
+				this.acctSocket = new DatagramSocket(getAcctPort());
 			else
-				acctSocket = new DatagramSocket(getAcctPort(), getListenAddress());
-			acctSocket.setSoTimeout(getSocketTimeout());
+				this.acctSocket = new DatagramSocket(getAcctPort(), getListenAddress());
+			this.acctSocket.setSoTimeout(getSocketTimeout());
 		}
-		return acctSocket;
+		return this.acctSocket;
 	}
 
 	/**
@@ -534,8 +534,8 @@ public abstract class RadiusServer {
 
 		byte[] authenticator = packet.getAuthenticator();
 
-		synchronized (receivedPackets) {
-			for (Iterator i = receivedPackets.iterator(); i.hasNext();) {
+		synchronized (this.receivedPackets) {
+			for (Iterator i = this.receivedPackets.iterator(); i.hasNext();) {
 				ReceivedPacket p = (ReceivedPacket) i.next();
 				if (p.receiveTime < intervalStart) {
 					// packet is older than duplicate interval
@@ -560,7 +560,7 @@ public abstract class RadiusServer {
 			rp.packetIdentifier = packet.getPacketIdentifier();
 			rp.receiveTime = now;
 			rp.authenticator = authenticator;
-			receivedPackets.add(rp);
+			this.receivedPackets.add(rp);
 		}
 
 		return false;

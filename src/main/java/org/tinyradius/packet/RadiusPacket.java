@@ -124,7 +124,7 @@ public class RadiusPacket {
 	 * @return packet identifier
 	 */
 	public int getPacketIdentifier() {
-		return packetIdentifier;
+		return this.packetIdentifier;
 	}
 
 	/**
@@ -145,7 +145,7 @@ public class RadiusPacket {
 	 * @return packet type
 	 */
 	public int getPacketType() {
-		return packetType;
+		return this.packetType;
 	}
 
 	/**
@@ -279,7 +279,7 @@ public class RadiusPacket {
 		if (value == null || value.length() == 0)
 			throw new IllegalArgumentException("value is empty");
 
-		AttributeType type = dictionary.getAttributeTypeByName(typeName);
+		AttributeType type = this.dictionary.getAttributeTypeByName(typeName);
 		if (type == null)
 			throw new IllegalArgumentException("unknown attribute type '" + typeName + "'");
 
@@ -327,7 +327,7 @@ public class RadiusPacket {
 		if (type < 1 || type > 255)
 			throw new IllegalArgumentException("attribute type out of bounds");
 
-		Iterator i = attributes.iterator();
+		Iterator i = this.attributes.iterator();
 		while (i.hasNext()) {
 			RadiusAttribute attribute = (RadiusAttribute) i.next();
 			if (attribute.getAttributeType() == type)
@@ -396,7 +396,7 @@ public class RadiusPacket {
 			throw new IllegalArgumentException("attribute type out of bounds");
 
 		LinkedList result = new LinkedList();
-		for (Iterator i = attributes.iterator(); i.hasNext();) {
+		for (Iterator i = this.attributes.iterator(); i.hasNext();) {
 			RadiusAttribute a = (RadiusAttribute) i.next();
 			if (attributeType == a.getAttributeType())
 				result.add(a);
@@ -441,7 +441,7 @@ public class RadiusPacket {
 	 * @return List of RadiusAttribute objects
 	 */
 	public List getAttributes() {
-		return attributes;
+		return this.attributes;
 	}
 
 	/**
@@ -505,7 +505,7 @@ public class RadiusPacket {
 		if (type == null || type.length() == 0)
 			throw new IllegalArgumentException("type name is empty");
 
-		AttributeType t = dictionary.getAttributeTypeByName(type);
+		AttributeType t = this.dictionary.getAttributeTypeByName(type);
 		if (t == null)
 			throw new IllegalArgumentException("unknown attribute type name '" + type + "'");
 
@@ -543,7 +543,7 @@ public class RadiusPacket {
 	 */
 	public List getVendorAttributes(int vendorId) {
 		LinkedList result = new LinkedList();
-		for (Iterator i = attributes.iterator(); i.hasNext();) {
+		for (Iterator i = this.attributes.iterator(); i.hasNext();) {
 			RadiusAttribute a = (RadiusAttribute) i.next();
 			if (a instanceof VendorSpecificAttribute) {
 				VendorSpecificAttribute vsa = (VendorSpecificAttribute) a;
@@ -751,8 +751,8 @@ public class RadiusPacket {
 		StringBuffer s = new StringBuffer();
 		s.append(getPacketTypeName());
 		s.append(", ID ");
-		s.append(packetIdentifier);
-		for (Iterator i = attributes.iterator(); i.hasNext();) {
+		s.append(this.packetIdentifier);
+		for (Iterator i = this.attributes.iterator(); i.hasNext();) {
 			RadiusAttribute attr = (RadiusAttribute) i.next();
 			s.append("\n");
 			s.append(attr.toString());
@@ -771,7 +771,7 @@ public class RadiusPacket {
 	 * @return authenticator, 16 bytes
 	 */
 	public byte[] getAuthenticator() {
-		return authenticator;
+		return this.authenticator;
 	}
 
 	/**
@@ -792,7 +792,7 @@ public class RadiusPacket {
 	 * @return Dictionary instance
 	 */
 	public Dictionary getDictionary() {
-		return dictionary;
+		return this.dictionary;
 	}
 
 	/**
@@ -806,7 +806,7 @@ public class RadiusPacket {
 	 */
 	public void setDictionary(Dictionary dictionary) {
 		this.dictionary = dictionary;
-		for (Iterator i = attributes.iterator(); i.hasNext();) {
+		for (Iterator i = this.attributes.iterator(); i.hasNext();) {
 			RadiusAttribute attr = (RadiusAttribute) i.next();
 			attr.setDictionary(dictionary);
 		}
@@ -841,7 +841,7 @@ public class RadiusPacket {
 		if (request == null) {
 			// first create authenticator, then encode attributes
 			// (User-Password attribute needs the authenticator)
-			authenticator = createRequestAuthenticator(sharedSecret);
+			this.authenticator = createRequestAuthenticator(sharedSecret);
 			encodeRequestAttributes(sharedSecret);
 		}
 
@@ -853,11 +853,11 @@ public class RadiusPacket {
 		// response packet authenticator
 		if (request != null) {
 			// after encoding attributes, create authenticator
-			authenticator = createResponseAuthenticator(sharedSecret, packetLength, attributes, request.getAuthenticator());
+			this.authenticator = createResponseAuthenticator(sharedSecret, packetLength, attributes, request.getAuthenticator());
 		}
 		else {
 			// update authenticator after encoding attributes
-			authenticator = updateRequestAuthenticator(sharedSecret, packetLength, attributes);
+			this.authenticator = updateRequestAuthenticator(sharedSecret, packetLength, attributes);
 		}
 
 		DataOutputStream dos = new DataOutputStream(out);
@@ -914,7 +914,7 @@ public class RadiusPacket {
 	 * @return new request authenticator
 	 */
 	protected byte[] updateRequestAuthenticator(String sharedSecret, int packetLength, byte[] attributes) {
-		return authenticator;
+		return this.authenticator;
 	}
 
 	/**
@@ -1094,14 +1094,14 @@ public class RadiusPacket {
 	 * @return MessageDigest object
 	 */
 	protected MessageDigest getMd5Digest() {
-		if (md5Digest == null)
+		if (this.md5Digest == null)
 			try {
-				md5Digest = MessageDigest.getInstance("MD5");
+				this.md5Digest = MessageDigest.getInstance("MD5");
 			}
 			catch (NoSuchAlgorithmException nsae) {
 				throw new RuntimeException("md5 digest not available", nsae);
 			}
-		return md5Digest;
+		return this.md5Digest;
 	}
 
 	/**
@@ -1113,7 +1113,7 @@ public class RadiusPacket {
 	 */
 	protected byte[] getAttributeBytes() throws IOException {
 		ByteArrayOutputStream bos = new ByteArrayOutputStream(MAX_PACKET_LENGTH);
-		for (Iterator i = attributes.iterator(); i.hasNext();) {
+		for (Iterator i = this.attributes.iterator(); i.hasNext();) {
 			RadiusAttribute a = (RadiusAttribute) i.next();
 			bos.write(a.writeAttribute());
 		}
