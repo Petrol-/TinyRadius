@@ -878,6 +878,7 @@ public class RadiusPacket {
 	 * @param sharedSecret
 	 */
 	protected void encodeRequestAttributes(String sharedSecret) {
+		//Need to be overriden
 	}
 
 	/**
@@ -1063,6 +1064,7 @@ public class RadiusPacket {
 	 * @throws RadiusException
 	 */
 	protected void decodeRequestAttributes(String sharedSecret) throws RadiusException {
+	//Can be overriden
 	}
 
 	/**

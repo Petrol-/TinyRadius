@@ -293,8 +293,8 @@ public abstract class RadiusServer {
 	 *            response packet
 	 */
 	protected static void copyProxyState(RadiusPacket request, RadiusPacket answer) {
-		List proxyStateAttrs = request.getAttributes(33);
-		for (Iterator i = proxyStateAttrs.iterator(); i.hasNext();) {
+		List<?> proxyStateAttrs = request.getAttributes(33);
+		for (Iterator<?> i = proxyStateAttrs.iterator(); i.hasNext();) {
 			RadiusAttribute proxyStateAttr = (RadiusAttribute) i.next();
 			answer.addAttribute(proxyStateAttr);
 		}
@@ -535,7 +535,7 @@ public abstract class RadiusServer {
 		byte[] authenticator = packet.getAuthenticator();
 
 		synchronized (this.receivedPackets) {
-			for (Iterator i = this.receivedPackets.iterator(); i.hasNext();) {
+			for (Iterator<ReceivedPacket> i = this.receivedPackets.iterator(); i.hasNext();) {
 				ReceivedPacket p = (ReceivedPacket) i.next();
 				if (p.receiveTime < intervalStart) {
 					// packet is older than duplicate interval
@@ -572,7 +572,7 @@ public abstract class RadiusServer {
 	private DatagramSocket authSocket = null;
 	private DatagramSocket acctSocket = null;
 	private int socketTimeout = 3000;
-	private List receivedPackets = new LinkedList();
+	private List<ReceivedPacket> receivedPackets = new LinkedList<ReceivedPacket>();
 	private long duplicateInterval = 30000; // 30 s
 	protected transient boolean closing = false;
 	private static Logger logger = LoggerFactory.getLogger(RadiusServer.class);

@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.StringTokenizer;
+
 import org.tinyradius.attribute.IntegerAttribute;
 import org.tinyradius.attribute.IpAttribute;
 import org.tinyradius.attribute.RadiusAttribute;
@@ -21,14 +22,13 @@ import org.tinyradius.attribute.StringAttribute;
 import org.tinyradius.attribute.VendorSpecificAttribute;
 
 /**
- * Parses a dictionary in "Radiator format" and fills a
- * WritableDictionary.
+ * Parses a dictionary in "Radiator format" and fills a WritableDictionary.
  */
 public class DictionaryParser {
 
 	/**
-	 * Returns a new dictionary filled with the contents
-	 * from the given input stream.
+	 * Returns a new dictionary filled with the contents from the given input
+	 * stream.
 	 * 
 	 * @param source
 	 *            input stream
@@ -53,7 +53,8 @@ public class DictionaryParser {
 	 * @throws RuntimeException
 	 *             syntax errors
 	 */
-	public static void parseDictionary(InputStream source, WritableDictionary dictionary) throws IOException {
+	public static void parseDictionary(InputStream source, WritableDictionary dictionary)
+			throws IOException {
 		// read each line separately
 		BufferedReader in = new BufferedReader(new InputStreamReader(source));
 
@@ -90,7 +91,8 @@ public class DictionaryParser {
 	/**
 	 * Parse a line that declares an attribute.
 	 */
-	private static void parseAttributeLine(WritableDictionary dictionary, StringTokenizer tok, int lineNum) throws IOException {
+	private static void parseAttributeLine(WritableDictionary dictionary, StringTokenizer tok,
+			int lineNum) throws IOException {
 		if (tok.countTokens() != 3)
 			throw new IOException("syntax error on line " + lineNum);
 
@@ -113,7 +115,8 @@ public class DictionaryParser {
 	/**
 	 * Parses a VALUE line containing an enumeration value.
 	 */
-	private static void parseValueLine(WritableDictionary dictionary, StringTokenizer tok, int lineNum) throws IOException {
+	private static void parseValueLine(WritableDictionary dictionary, StringTokenizer tok,
+			int lineNum) throws IOException {
 		if (tok.countTokens() != 3)
 			throw new IOException("syntax error on line " + lineNum);
 
@@ -132,7 +135,8 @@ public class DictionaryParser {
 	/**
 	 * Parses a line that declares a Vendor-Specific attribute.
 	 */
-	private static void parseVendorAttributeLine(WritableDictionary dictionary, StringTokenizer tok, int lineNum) throws IOException {
+	private static void parseVendorAttributeLine(WritableDictionary dictionary,
+			StringTokenizer tok, int lineNum) throws IOException {
 		if (tok.countTokens() != 4)
 			throw new IOException("syntax error on line " + lineNum);
 
@@ -149,7 +153,8 @@ public class DictionaryParser {
 	/**
 	 * Parses a line containing a vendor declaration.
 	 */
-	private static void parseVendorLine(WritableDictionary dictionary, StringTokenizer tok, int lineNum) throws IOException {
+	private static void parseVendorLine(WritableDictionary dictionary, StringTokenizer tok,
+			int lineNum) throws IOException {
 		if (tok.countTokens() != 2)
 			throw new IOException("syntax error on line " + lineNum);
 
@@ -162,7 +167,8 @@ public class DictionaryParser {
 	/**
 	 * Includes a dictionary file.
 	 */
-	private static void includeDictionaryFile(WritableDictionary dictionary, StringTokenizer tok, int lineNum) throws IOException {
+	private static void includeDictionaryFile(WritableDictionary dictionary, StringTokenizer tok,
+			int lineNum) throws IOException {
 		if (tok.countTokens() != 1)
 			throw new IOException("syntax error on line " + lineNum);
 		String includeFile = tok.nextToken();
@@ -171,8 +177,9 @@ public class DictionaryParser {
 		if (!incf.exists())
 			throw new IOException("inclueded file '" + includeFile + "' not found, line " + lineNum);
 
-		FileInputStream fis = new FileInputStream(incf);
-		parseDictionary(fis, dictionary);
+		try (FileInputStream fis = new FileInputStream(incf)) {
+			parseDictionary(fis, dictionary);
+		}
 
 		// line numbers begin with 0 again, but file name is
 		// not mentioned in exceptions
@@ -181,8 +188,8 @@ public class DictionaryParser {
 	}
 
 	/**
-	 * Returns the RadiusAttribute descendant class for the given
-	 * attribute type.
+	 * Returns the RadiusAttribute descendant class for the given attribute
+	 * type.
 	 * 
 	 * @param attributeType
 	 * 

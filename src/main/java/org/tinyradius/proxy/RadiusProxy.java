@@ -202,10 +202,12 @@ public abstract class RadiusProxy extends RadiusServer {
 		// send back using correct socket
 		DatagramSocket socket;
 		if (proxyConnection.getPort() == getAuthPort())
+			
 			socket = getAuthSocket();
 		else
 			socket = getAcctSocket();
 		socket.send(datagram);
+		
 	}
 
 	/**
@@ -248,8 +250,9 @@ public abstract class RadiusProxy extends RadiusServer {
 		packet.setAuthenticator(auth);
 
 		// send packet
-		DatagramSocket proxySocket = getProxySocket();
+		try(DatagramSocket proxySocket = getProxySocket()){
 		proxySocket.send(datagram);
+		}
 	}
 
 	/**
@@ -266,6 +269,6 @@ public abstract class RadiusProxy extends RadiusServer {
 
 	private int proxyPort = 1814;
 	private DatagramSocket proxySocket = null;
-	private static Logger logger = LoggerFactory.getLogger(RadiusProxy.class);
+	static Logger logger = LoggerFactory.getLogger(RadiusProxy.class);
 
 }

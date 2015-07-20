@@ -44,8 +44,9 @@ extends MemoryDictionary{
 	static {
 		try {
 			instance = new DefaultDictionary();
-    		InputStream source = DefaultDictionary.class.getClassLoader().getResourceAsStream(DICTIONARY_RESOURCE);
+    		try(InputStream source = DefaultDictionary.class.getClassLoader().getResourceAsStream(DICTIONARY_RESOURCE)){
 			DictionaryParser.parseDictionary(source, instance);
+    		}
 		} catch (IOException e) {
 			throw new RuntimeException("default dictionary unavailable", e);
 		}
